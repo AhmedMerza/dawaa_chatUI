@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Dawaa chat UI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.white,
         accentColor: Color(0xFFFEF9EB),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),

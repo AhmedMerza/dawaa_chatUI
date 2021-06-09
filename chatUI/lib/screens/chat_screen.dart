@@ -1,6 +1,7 @@
 import 'package:chatUI/models/message_model.dart';
 import 'package:chatUI/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   final User user;
@@ -29,7 +30,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       width: MediaQuery.of(context).size.width * 0.65,
       decoration: BoxDecoration(
-        color: isMe ? Theme.of(context).accentColor : Color(0xFFFFFEFEE),
+        color: isMe ? Colors.blue[200] : Colors.grey.shade200,
         borderRadius: isMe
             ? BorderRadius.only(
                 topLeft: Radius.circular(
@@ -74,19 +75,18 @@ class _ChatScreenState extends State<ChatScreen> {
     return Row(
       children: <Widget>[
         msg,
-        IconButton(
-          icon: message.isLiked
-              ? Icon(Icons.favorite)
-              : Icon(Icons.favorite_border),
-          iconSize: 30.0,
-          color: message.isLiked ? Colors.red : Colors.blueGrey,
-          onPressed: () {},
-        )
       ],
     );
   }
 
   _buildMessageComposer() {
+    String inputText;
+    final inputTextController = TextEditingController();
+
+    clearTextInput() {
+      inputTextController.clear();
+    }
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 8.0,
@@ -104,9 +104,13 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {}),
           Expanded(
               child: TextField(
+            controller: inputTextController,
             textCapitalization: TextCapitalization.sentences,
-            onChanged: (value) {},
-            decoration: InputDecoration.collapsed(hintText: 'Send a message'),
+            onChanged: (value) {
+              inputText = value;
+            },
+            decoration:
+                InputDecoration.collapsed(hintText: 'Write a message...'),
           )),
           IconButton(
               icon: Icon(
@@ -114,7 +118,24 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               iconSize: 25.0,
               color: Colors.blue,
-              onPressed: () {})
+              onPressed: () {
+                clearTextInput();
+                DateTime now = DateTime.now();
+                String formattedDate = DateFormat('kk:mm').format(now);
+                setState(() {
+                  if (inputText != null) {
+                    messages.add(
+                      Message(
+                        sender: currentUser,
+                        time: formattedDate,
+                        text: inputText,
+                        isLiked: false,
+                        unread: true,
+                      ),
+                    );
+                  }
+                });
+              })
         ],
       ),
     );
@@ -125,22 +146,64 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        title: Text(
-          widget.user.name,
-          style: TextStyle(
-            fontSize: 28.0,
-            fontWeight: FontWeight.bold,
+        elevation: 0.0,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        flexibleSpace: SafeArea(
+          child: Container(
+            padding: EdgeInsets.only(right: 16),
+            child: Row(
+              children: <Widget>[
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  width: 2,
+                ),
+                CircleAvatar(
+                  backgroundImage: AssetImage(widget.user.imageUrl),
+                  maxRadius: 20,
+                ),
+                SizedBox(
+                  width: 12,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        widget.user.name,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 6,
+                      ),
+                      Text(
+                        "Online",
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.more_horiz),
+                  iconSize: 30.0,
+                  color: Colors.black54,
+                  onPressed: () {},
+                ),
+              ],
+            ),
           ),
         ),
-        elevation: 0.0,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.more_horiz),
-            iconSize: 30.0,
-            color: Colors.white,
-            onPressed: () {},
-          ),
-        ],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -149,7 +212,6 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(
                       30.0,
@@ -160,16 +222,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(
-                      30.0,
-                    ),
-                    topRight: Radius.circular(
-                      30.0,
-                    ),
-                  ),
                   child: ListView.builder(
-                    reverse: true,
+                    // reverse: true,
                     padding: EdgeInsets.only(
                       top: 15.0,
                     ),

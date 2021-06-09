@@ -37,7 +37,6 @@ class FavoriteContacts extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   itemCount: favorites.length,
                   itemBuilder: (BuildContext context, int index) {
-                    var chat;
                     return GestureDetector(
                       onTap: () => Navigator.push(
                         context,
