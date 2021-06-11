@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:chatUI/models/user_model.dart';
 
 class Message {
@@ -7,6 +8,7 @@ class Message {
   final String text;
   bool isLiked;
   bool unread;
+  File image;
 
   Message({
     this.sender,
@@ -14,6 +16,7 @@ class Message {
     this.text,
     this.isLiked,
     this.unread,
+    this.image,
   });
 }
 

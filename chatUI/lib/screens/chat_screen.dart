@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:chatUI/models/message_model.dart';
 import 'package:chatUI/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -13,70 +16,133 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   _buildMessage(Message message, bool isMe) {
-    final Container msg = Container(
-      margin: isMe
-          ? EdgeInsets.only(
-              top: 8.0,
-              bottom: 8.0,
-              left: 80.0,
-            )
-          : EdgeInsets.only(
-              top: 8.0,
-              bottom: 8.0,
-            ),
-      padding: EdgeInsets.symmetric(
-        horizontal: 25.0,
-        vertical: 15.0,
-      ),
-      width: MediaQuery.of(context).size.width * 0.65,
-      decoration: BoxDecoration(
-        color: isMe ? Colors.blue[200] : Colors.grey.shade200,
-        borderRadius: isMe
-            ? BorderRadius.only(
-                topLeft: Radius.circular(
-                  15.0,
-                ),
-                bottomLeft: Radius.circular(15.0))
-            : BorderRadius.only(
-                topRight: Radius.circular(
-                  15.0,
-                ),
-                bottomRight: Radius.circular(15.0),
-              ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            message.time,
-            style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(
-            height: 8.0,
-          ),
-          Text(
-            message.text,
-            style: TextStyle(
-              color: Colors.blueGrey,
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-    if (isMe) {
-      return msg;
+    Widget currentMessage() {
+      // if (message.image == null) {
+      return Text(
+        message.text,
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 16.0,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+      // } else {
+      //   if (message.image != null)
+      //     return Image.file(message.image);
+      //   else
+      //     return Text('no image');
+      //   return Image.file(message.image);
+      // }
     }
-    return Row(
-      children: <Widget>[
-        msg,
-      ],
+
+    return Container(
+      padding: EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
+      child: Align(
+        alignment: isMe ? Alignment.topRight : Alignment.topLeft,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.65,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: isMe ? Colors.blue[200] : Colors.grey.shade200,
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // currentMessage(),
+              Text(
+                message.text,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 4.0),
+              Text(
+                message.time,
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+    // final Container msg = Container(
+    //   margin: isMe
+    //       ? EdgeInsets.only(
+    //           top: 8.0,
+    //           bottom: 8.0,
+    //           left: 80.0,
+    //         )
+    //       : EdgeInsets.only(
+    //           top: 8.0,
+    //           bottom: 8.0,
+    //         ),
+    //   padding: EdgeInsets.symmetric(
+    //     horizontal: 25.0,
+    //     vertical: 15.0,
+    //   ),
+    //   constraints: BoxConstraints(
+    //     maxWidth: MediaQuery.of(context).size.width * 0.5,
+    //   ),
+    //   decoration: BoxDecoration(
+    //     color: isMe ? Colors.blue[200] : Colors.grey.shade200,
+    //     borderRadius: isMe
+    //         ? BorderRadius.only(
+    //             topLeft: Radius.circular(
+    //               15.0,
+    //             ),
+    //             bottomLeft: Radius.circular(15.0))
+    //         : BorderRadius.only(
+    //             topRight: Radius.circular(
+    //               15.0,
+    //             ),
+    //             bottomRight: Radius.circular(15.0),
+    //           ),
+    //   ),
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: <Widget>[
+    //       Text(
+    //         message.text,
+    //         style: TextStyle(
+    //           color: Colors.blueGrey,
+    //           fontSize: 16.0,
+    //           fontWeight: FontWeight.w600,
+    //         ),
+    //       ),
+    //       Row(
+    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //         children: <Widget>[
+    //           SizedBox(),
+    //           Text(
+    //             message.time,
+    //             style: TextStyle(
+    //               color: Colors.blueGrey,
+    //               fontSize: 14.0,
+    //               fontWeight: FontWeight.w600,
+    //             ),
+    //           ),
+    //         ],
+    //       ),
+    //     ],
+    //   ),
+    // );
+    // if (isMe) {
+    //   return msg;
+    // }
+    // return Row(
+    //   children: <Widget>[
+    //     msg,
+    //   ],
+    // );
   }
 
   _buildMessageComposer() {
@@ -85,6 +151,88 @@ class _ChatScreenState extends State<ChatScreen> {
 
     clearTextInput() {
       inputTextController.clear();
+    }
+
+    File imageFile;
+
+    _openGallery(BuildContext context) async {
+      var pic = await ImagePicker.pickImage(source: ImageSource.gallery);
+      this.setState(() {
+        imageFile = File(pic.path);
+      });
+      Navigator.pop(context);
+    }
+
+    _openCamera(BuildContext context) async {
+      var pic = await ImagePicker.pickImage(source: ImageSource.camera);
+      this.setState(() {
+        imageFile = File(pic.path);
+      });
+      Navigator.pop(context);
+    }
+
+    Future<void> _showChoiceDialog(BuildContext context) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Choose'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    GestureDetector(
+                        child: Text('Gallery'),
+                        onTap: () {
+                          _openGallery(context);
+                        }),
+                    Padding(
+                      padding: EdgeInsets.all(
+                        8.0,
+                      ),
+                    ),
+                    GestureDetector(
+                        child: Text('Camera'),
+                        onTap: () {
+                          _openCamera(context);
+                        }),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
+    void _decideMessage() {
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('kk:mm').format(now);
+      if (imageFile == null) {
+        clearTextInput();
+
+        setState(() {
+          messages.add(
+            Message(
+              sender: currentUser,
+              time: formattedDate,
+              text: inputText,
+              isLiked: false,
+              unread: true,
+              image: null,
+            ),
+          );
+        });
+      } else {
+        messages.add(
+          Message(
+            sender: currentUser,
+            time: formattedDate,
+            text: null,
+            isLiked: false,
+            unread: true,
+            image: imageFile,
+          ),
+        );
+      }
+      imageFile = null;
     }
 
     return Container(
@@ -101,7 +249,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               iconSize: 25.0,
               color: Colors.blue,
-              onPressed: () {}),
+              onPressed: () {
+                _showChoiceDialog(context);
+              }),
           Expanded(
               child: TextField(
             controller: inputTextController,
@@ -119,21 +269,22 @@ class _ChatScreenState extends State<ChatScreen> {
               iconSize: 25.0,
               color: Colors.blue,
               onPressed: () {
-                clearTextInput();
+                // _decideMessage();
                 DateTime now = DateTime.now();
                 String formattedDate = DateFormat('kk:mm').format(now);
+                clearTextInput();
+
                 setState(() {
-                  if (inputText != null) {
-                    messages.add(
-                      Message(
-                        sender: currentUser,
-                        time: formattedDate,
-                        text: inputText,
-                        isLiked: false,
-                        unread: true,
-                      ),
-                    );
-                  }
+                  messages.add(
+                    Message(
+                      sender: currentUser,
+                      time: formattedDate,
+                      text: inputText,
+                      isLiked: false,
+                      unread: true,
+                      image: null,
+                    ),
+                  );
                 });
               })
         ],
@@ -223,11 +374,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 child: ClipRRect(
                   child: ListView.builder(
-                    // reverse: true,
+                    itemCount: messages.length,
+                    shrinkWrap: true,
                     padding: EdgeInsets.only(
                       top: 15.0,
                     ),
-                    itemCount: messages.length,
                     itemBuilder: (
                       BuildContext context,
                       int index,
